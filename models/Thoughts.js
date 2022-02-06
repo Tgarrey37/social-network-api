@@ -1,22 +1,65 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const { Schema, Model, Types } = require("mongoose");
+const moment = require("moment");
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+const thoughtsSchema = new Schema({
+    
+    thoughtText: {
+        type: String,
+        required: true,
+        maxlength: 280
+    },
+    createdAt:{
+      type: Date,
+      default: Date.now,
+      get: (createdAtVal) => moment(createdAtVal).format('MMMM DD, YYYY')
+    },
+    username: {
+        type: String,
+        required: true
+    },
+    reactions: [reactionsSchema]
+},
+{
+    toJSON: {
+        virtuals: true,
+        getters: true
+    },
+    id: false,
+}
+);
+const reactionsSchema = new Schema(
+    {
+    // Set custom ID 
+    reactionId: {
+        type: Schema.Types.ObjectId,
+        default: ()=> new Types.ObjectId()
+    },
+    reactionBody: {
+        type: String,
+        required: true,
+        maxlength: 280
+    },
+    username: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a')
+    }
+    },
+    {
+    toJSON: {
+        getters: true
+    } 
+    }
+)
 
-app.use (express.json());
-app.use(express.urlencoded({extended: true}));
-
-app.use(express.static('public'));
-
-app.use(require('./routes'));
-
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/social-network-api', {
-  useFindAndModify: false,
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+thoughtsSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
 });
 
-mongoose.set('debug', true);
+const Thoughts = Model('Thoughts', thoughtsSchema);
 
-app.listen(PORT, () => console.log(`Connected on localhost:${PORT}`));
+module.exports = Thoughts;
