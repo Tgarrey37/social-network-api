@@ -20,7 +20,7 @@ all dependencies !
 - Javascript 
 
 ## Links 
-[Github]()
+[Github](https://github.com/Tgarrey37/social-network-api)
 
-[Demo]()
+[Demo](https://vimeo.com/manage/videos/675727790)
 
